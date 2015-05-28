@@ -31,10 +31,8 @@ signals.connect = function (signal_name, callback)
     _s[signal_name] = callback
 end
 
-signals.disconnect = function (signal_name, callback)
-    if _s[signal_name] then
-        _s[signal_name] = nil
-    end
+signals.disconnect = function (signal_name)
+    _s[signal_name] = nil
 end
 
 signals.send = function (signal_name, sender, ...)

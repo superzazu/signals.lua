@@ -26,7 +26,7 @@ describe("signals test", function()
         end
 
         signals.connect('kill_monster', my_callback)
-        signals.disconnect('kill_monster', my_callback)
+        signals.disconnect('kill_monster')
         signals.send('kill_monster', monster)
 
         assert.are.equal(monster.is_alive, true)
@@ -44,9 +44,9 @@ describe("signals test", function()
             sender.is_alive = false
         end
 
-        signals.connect('kill_all_monsters', kill_monster)
-        signals.send('kill_all_monsters', monster)
-        signals.send('kill_all_monsters', monster2)
+        signals.connect('kill_monster', kill_monster)
+        signals.send('kill_monster', monster)
+        signals.send('kill_monster', monster2)
 
         assert.are.equal(monster.is_alive, false)
         assert.are.equal(monster2.is_alive, false)
