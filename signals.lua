@@ -1,5 +1,5 @@
 local signals = {
-    _VERSION         = 'signals v1.0.0',
+    _VERSION         = 'signals v1.1.0',
     _DESCRIPTION    = 'An simple signals module in Lua',
     _URL            = 'http://github.com/superzazu/signals.lua',
     _LICENSE        = [[
@@ -28,16 +28,30 @@ local signals = {
 local _s = {}
 
 signals.connect = function (signal_name, callback)
-    _s[signal_name] = callback
+    -- if type(signal_name) == 'function' then
+    --     -- nil event: trigger everything
+    --     callback = signal_name
+    --     signal_name = '__nil_signal' -- not good enough.
+    -- end
+    if not _s[signal_name] then
+        _s[signal_name] = {}
+    end
+    local id = #_s[signal_name]+1
+    _s[signal_name][id] = callback
+    return id
 end
 
-signals.disconnect = function (signal_name)
-    _s[signal_name] = nil
-end
-
-signals.send = function (signal_name, sender, ...)
+signals.disconnect = function (signal_name, id)
     if _s[signal_name] then
-        _s[signal_name](sender, ...)
+        _s[signal_name][id] = nil
+    end
+end
+
+signals.send = function (signal_name, ...)
+    if _s[signal_name] then
+        for i=1,#_s[signal_name] do
+            _s[signal_name][i](...)
+        end
     end
 end
 
