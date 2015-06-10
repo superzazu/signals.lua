@@ -14,7 +14,7 @@ describe("signals test", function ()
             end)
         end
 
-        m = Monster:new()
+        local m = Monster:new()
         assert.are.equal(m.is_alive, true)
         signals.send('hero_hit_monster')
         assert.are.equal(m.is_alive, false)
@@ -32,8 +32,8 @@ describe("signals test", function ()
             end)
         end
 
-        m = Monster:new()
-        m2 = Monster:new()
+        local m = Monster:new()
+        local m2 = Monster:new()
         m2.can_die = false
 
         assert.are.equal(m.is_alive, true)
@@ -43,7 +43,7 @@ describe("signals test", function ()
         assert.are.equal(m2.is_alive, true)
     end)
 
-    it("real life test", function ()
+    it("'real life' test", function ()
         -- when player is hit, we want to trigger two callbacks :
         --     kill the player + change the game state
 
@@ -66,8 +66,8 @@ describe("signals test", function ()
             end)
         end
 
-        g = Game:new()
-        p = Player:new()
+        local g = Game:new()
+        local p = Player:new()
         assert.are.equal(g.state, 'game')
         assert.are.equal(p.is_alive, true)
 
@@ -76,6 +76,31 @@ describe("signals test", function ()
         assert.are.equal(g.state, 'game_over')
         assert.are.equal(p.is_alive, false)
 
+    end)
+
+    it("can pass parameters to send", function ()
+        local log_kills = ''
+
+        local Monster = class('Monster')
+        function Monster:initialize()
+            self.name = 'monster1'
+        end
+        function Monster:is_hit()
+            signals.send('monster_killed', self)
+        end
+
+        local Game = class('Game')
+        function Game:initialize()
+            signals.connect('monster_killed', function (sender)
+                log_kills = log_kills .. sender.name .. ' has been killed!'
+            end)
+        end
+
+        local g = Game:new()
+        local m = Monster:new()
+        m:is_hit()
+
+        assert.are.equal(log_kills, 'monster1 has been killed!')
     end)
 
     it("can disconnect signal", function ()
