@@ -1,9 +1,9 @@
 local signals = {
-    _VERSION         = 'signals v1.1.0',
-    _DESCRIPTION    = 'An simple signals module in Lua',
-    _URL            = 'http://github.com/superzazu/signals.lua',
+    _VERSION        = "signals v1.2.0",
+    _DESCRIPTION    = "An simple signals module in Lua",
+    _URL            = "http://github.com/superzazu/signals.lua",
     _LICENSE        = [[
-Copyright (c) 2014 Nicolas Allemand
+Copyright (c) 2014-2017 Nicolas Allemand
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,35 +25,40 @@ THE SOFTWARE.
     ]]
 }
 
-local _s = {}
+local s = {}
 
-signals.connect = function (signal_name, callback)
-    -- if type(signal_name) == 'function' then
-    --     -- nil event: trigger everything
-    --     callback = signal_name
-    --     signal_name = '__nil_signal' -- not good enough.
-    -- end
-    if not _s[signal_name] then
-        _s[signal_name] = {}
-    end
-    local id = #_s[signal_name]+1
-    _s[signal_name][id] = callback
+signals.connect = function(signal_name, callback, group_name)
+    local id = #s + 1
+    s[id] = {}
+    s[id].callback = callback
+    s[id].signal_name = signal_name or ""
+    s[id].group_name = group_name
+
     return id
 end
 
-signals.disconnect = function (signal_name, id)
-    if _s[signal_name] then
-        _s[signal_name][id] = nil
-    end
+signals.disconnect = function(id)
+    s[id] = nil
 end
 
-signals.send = function (signal_name, ...)
-    if _s[signal_name] then
-        for i=1,#_s[signal_name] do
-            _s[signal_name][i](...)
+signals.disconnectGroup = function(group_name)
+    for i, v in pairs(s) do
+        if s[i].group_name == group_name then
+            s[i] = nil
         end
     end
 end
 
+signals.send = function(signal_name, ...)
+    for i, v in pairs(s) do
+        if s[i].signal_name == signal_name or s[i].signal_name == "" then
+            s[i].callback(...)
+        end
+    end
+end
+
+signals.reset = function()
+    s = {}
+end
 
 return signals
